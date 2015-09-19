@@ -1,0 +1,73 @@
+/*
+
+Camera Shield Example
+
+This example shows an application on 1Sheeld's camera shield.
+
+By using this example, you can take a photo using your phone's
+camera if the light sensor reads data above a certain threshold.
+
+*/
+
+/* Include 1Sheeld library. */ 
+#include <OneSheeld.h>
+
+const int trigPin = 2;
+const int echoPin = 4;
+
+
+void setup()
+{
+  /* Start communication. */
+  OneSheeld.begin();
+}
+
+void loop()
+{
+  
+  // establish variables for duration of the ping, 
+  // and the distance result in inches and centimeters:
+  long duration, cm;
+
+  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  pinMode(trigPin, OUTPUT);
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+    // Read the signal from the sensor: a HIGH pulse whose
+  // duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+  
+ // convert the time into a distance
+  
+  cm = microsecondsToCentimeters(duration);
+  
+  /* Always get the value of the light sensor and make sure it is in a certain range. */
+  if(cm < 100 && cm > 30)
+  {
+    Terminal.println("Photo will be taken");
+    /* Turn on the camera's flash while capturing. */
+    Camera.setFlash(ON);
+    /* Take a photo using the phone's rear camera. */
+    Camera.rearCapture();
+    /* Delay for 5 seconds. */
+    String status = "status to be written to facebook along the picture";
+    Twitter.tweetLastPicture(status , 0/1);
+
+  }
+   delay(100);
+}
+
+long microsecondsToCentimeters(long microseconds)
+{
+  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+  // The ping travels out and back, so to find the distance of the
+  // object we take half of the distance travelled.
+  return microseconds / 29 / 2;
+}
